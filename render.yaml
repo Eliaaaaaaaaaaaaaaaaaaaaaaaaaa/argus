@@ -1,7 +1,7 @@
 
 services:
   - type: web
-    name: swiss-delta
+    name: argus-map
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn -b 0.0.0.0:$PORT app:app

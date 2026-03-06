@@ -2,10 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<title>Swiss Delta Map</title>
+<meta charset="utf-8">
+<title>ARGUS Tactical Map</title>
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <style>
 body { margin:0; font-family:Arial; }
 #map { height:100vh; }
@@ -15,58 +17,57 @@ top:10px;
 left:10px;
 background:white;
 padding:10px;
-border-radius:6px;
+border-radius:8px;
 z-index:1000;
 box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
 </style>
+
 </head>
+
 <body>
 
 <div class="panel">
 <select id="type">
-<option value="drone">Drone</option>
-<option value="troops">Troops</option>
-<option value="jet">Jet</option>
-<option value="tank">Tank</option>
-<option value="artillery">Artillery</option>
-<option value="mine">Mine</option>
-<option value="antiair">Anti Air</option>
+<option value="Drone">Drone</option>
+<option value="Troops">Troops</option>
+<option value="Jet">Jet</option>
+<option value="Tank">Tank</option>
+<option value="Artillery">Artillery</option>
+<option value="Mine">Mine</option>
+<option value="Anti-Air">Anti-Air</option>
 </select>
-<button onclick="clearMarkers()">Clear</button>
 </div>
 
 <div id="map"></div>
 
 <script>
-var map = L.map('map').setView([46.8, 8.3], 7);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-maxZoom: 19
+const map = L.map("map").setView([46.8, 8.3], 7);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+maxZoom: 19,
 }).addTo(map);
 
-var icons = {
-drone: L.icon({iconUrl:'/static/icons/drone.png', iconSize:[30,30]}),
-troops: L.icon({iconUrl:'/static/icons/troops.png', iconSize:[30,30]}),
-jet: L.icon({iconUrl:'/static/icons/jet.png', iconSize:[30,30]}),
-tank: L.icon({iconUrl:'/static/icons/tank.png', iconSize:[30,30]}),
-artillery: L.icon({iconUrl:'/static/icons/artillery.png', iconSize:[30,30]}),
-mine: L.icon({iconUrl:'/static/icons/mine.png', iconSize:[30,30]}),
-antiair: L.icon({iconUrl:'/static/icons/antiair.png', iconSize:[30,30]})
-};
-
 function loadMarkers(){
+
 fetch("/markers")
-.then(r=>r.json())
-.then(data=>{
-data.forEach(m=>{
-L.marker([m.lat, m.lng], {icon:icons[m.type]}).addTo(map);
-});
-});
+.then(r => r.json())
+.then(data => {
+
+data.forEach(m => {
+L.marker([m.lat, m.lng])
+.addTo(map)
+.bindPopup(m.type)
+})
+
+})
+
 }
 
 map.on("click", function(e){
-let type = document.getElementById("type").value;
+
+const type = document.getElementById("type").value
 
 fetch("/markers",{
 method:"POST",
@@ -76,14 +77,12 @@ lat:e.latlng.lat,
 lng:e.latlng.lng,
 type:type
 })
-}).then(()=>location.reload());
-});
+}).then(()=>location.reload())
 
-function clearMarkers(){
-fetch("/markers",{method:"DELETE"}).then(()=>location.reload());
-}
+})
 
-loadMarkers();
+loadMarkers()
+
 </script>
 
 </body>
