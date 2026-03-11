@@ -185,16 +185,32 @@
       enemy: 'Feind'
     };
 
-    function makeIcon(type) {
-      const emoji = emojiMap[type] || '📍';
-      return L.divIcon({
-        className: '',
-        html: `<div class="emoji-icon">${emoji}</div>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15],
-        popupAnchor: [0, -10]
-      });
-    }
+function makeIcon(type, category) {
+  const emoji = emojiMap[type] || '📍';
+
+  let color = "#94a3b8";
+
+  if (category === "danger") color = "#facc15";   // Gelb
+  if (category === "friendly") color = "#3b82f6"; // Blau
+  if (category === "enemy") color = "#ef4444";    // Rot
+
+  return L.divIcon({
+    className: '',
+    html: `
+      <div class="emoji-icon" style="
+        background:${color};
+        color:#000;
+        border:2px solid rgba(0,0,0,0.4);
+        font-size:18px;
+      ">
+        ${emoji}
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -10]
+  });
+}
 
     async function refreshMarkers() {
       try {
@@ -203,7 +219,7 @@
         layerGroup.clearLayers();
 
         data.forEach(m => {
-          const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type) }).addTo(layerGroup);
+          const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
           marker.bindPopup(`
             <strong>${categoryLabel[m.category] || m.category}</strong><br>
             Typ: ${m.type}<br>
