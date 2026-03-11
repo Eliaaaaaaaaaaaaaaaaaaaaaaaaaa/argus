@@ -1,89 +1,256 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-<meta charset="utf-8">
-<title>ARGUS Tactical Map</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<style>
-body { margin:0; font-family:Arial; }
-#map { height:100vh; }
-.panel {
-position:absolute;
-top:10px;
-left:10px;
-background:white;
-padding:10px;
-border-radius:8px;
-z-index:1000;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-</style>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ARGUS Tactical Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --panel: rgba(17, 24, 39, 0.92);
+      --line: rgba(255,255,255,0.12);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+    #map { height: 100vh; width: 100vw; background: #020617; }
+    .panel {
+      position: absolute;
+      z-index: 1000;
+      top: 12px;
+      left: 12px;
+      width: 320px;
+      max-width: calc(100vw - 24px);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
+    .sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
+    select, input, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform .08s ease, opacity .2s ease;
+    }
+    button:hover { opacity: .95; }
+    button:active { transform: translateY(1px); }
+    .primary { background: #2563eb; }
+    .danger { background: #991b1b; }
+    .meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .legend {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 1000;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      min-width: 220px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .legend h3 { margin: 0 0 10px; font-size: 14px; }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .emoji-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    @media (max-width: 680px) {
+      .panel { width: calc(100vw - 24px); }
+      .legend { display: none; }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="panel">
+    <div class="title">ARGUS Tactical Map</div>
+    <div class="sub">Klick auf die Karte, um einen Marker zu setzen.</div>
 
-<div class="panel">
-<select id="type">
-<option value="Drone">Drone</option>
-<option value="Troops">Troops</option>
-<option value="Jet">Jet</option>
-<option value="Tank">Tank</option>
-<option value="Artillery">Artillery</option>
-<option value="Mine">Mine</option>
-<option value="Anti-Air">Anti-Air</option>
-</select>
-</div>
+    <label for="category">Kategorie</label>
+    <select id="category">
+      <option value="danger">Gefahr</option>
+      <option value="friendly">Eigene Kräfte</option>
+      <option value="enemy">Feind</option>
+    </select>
 
-<div id="map"></div>
+    <label for="type">Typ</label>
+    <select id="type">
+      <option value="drone">Drohne</option>
+      <option value="troops">Truppen</option>
+      <option value="jet">Jet</option>
+      <option value="tank">Panzer</option>
+      <option value="artillery">Artillerie</option>
+      <option value="mine">Minen</option>
+      <option value="antiair">Anti-Air</option>
+    </select>
 
-<script>
+    <label for="note">Notiz</label>
+    <input id="note" type="text" maxlength="120" placeholder="Optionaler Text" />
 
-const map = L.map("map").setView([46.8, 8.3], 7);
+    <div class="row" style="margin-top: 10px;">
+      <button class="primary" onclick="refreshMarkers()">Aktualisieren</button>
+      <button class="danger" onclick="clearMarkers()">Alles löschen</button>
+    </div>
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-maxZoom: 19,
-}).addTo(map);
+    <div class="meta">
+      Auto-Sync alle 3 Sekunden.<br>
+      Endpoint-Test: <code>/health</code>
+    </div>
+  </div>
 
-function loadMarkers(){
+  <div class="legend">
+    <h3>Legende</h3>
+    <div class="legend-grid">
+      <div>🚁 Drohne</div><div>👥 Truppen</div>
+      <div>✈️ Jet</div><div>🛡️ Panzer</div>
+      <div>💥 Artillerie</div><div>⚠️ Minen</div>
+      <div>🎯 Anti-Air</div><div>📍 Marker</div>
+    </div>
+  </div>
 
-fetch("/markers")
-.then(r => r.json())
-.then(data => {
+  <div id="map"></div>
 
-data.forEach(m => {
-L.marker([m.lat, m.lng])
-.addTo(map)
-.bindPopup(m.type)
-})
+  <script>
+    const map = L.map('map').setView([46.8182, 8.2275], 8);
+    const layerGroup = L.layerGroup().addTo(map);
 
-})
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
 
-}
+    const emojiMap = {
+      drone: '🚁',
+      troops: '👥',
+      jet: '✈️',
+      tank: '🛡️',
+      artillery: '💥',
+      mine: '⚠️',
+      antiair: '🎯'
+    };
 
-map.on("click", function(e){
+    const categoryLabel = {
+      danger: 'Gefahr',
+      friendly: 'Eigene Kräfte',
+      enemy: 'Feind'
+    };
 
-const type = document.getElementById("type").value
+    function makeIcon(type) {
+      const emoji = emojiMap[type] || '📍';
+      return L.divIcon({
+        className: '',
+        html: `<div class="emoji-icon">${emoji}</div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -10]
+      });
+    }
 
-fetch("/markers",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-lat:e.latlng.lat,
-lng:e.latlng.lng,
-type:type
-})
-}).then(()=>location.reload())
+    async function refreshMarkers() {
+      try {
+        const res = await fetch('/markers', { cache: 'no-store' });
+        const data = await res.json();
+        layerGroup.clearLayers();
 
-})
+        data.forEach(m => {
+          const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type) }).addTo(layerGroup);
+          marker.bindPopup(`
+            <strong>${categoryLabel[m.category] || m.category}</strong><br>
+            Typ: ${m.type}<br>
+            ${m.note ? `Notiz: ${m.note}<br>` : ''}
+            Lat: ${Number(m.lat).toFixed(5)}<br>
+            Lng: ${Number(m.lng).toFixed(5)}
+          `);
+        });
+      } catch (err) {
+        console.error('Fehler beim Laden der Marker:', err);
+      }
+    }
 
-loadMarkers()
+    map.on('click', async (e) => {
+      const payload = {
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+        category: document.getElementById('category').value,
+        type: document.getElementById('type').value,
+        note: document.getElementById('note').value
+      };
 
-</script>
+      try {
+        await fetch('/markers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        document.getElementById('note').value = '';
+        refreshMarkers();
+      } catch (err) {
+        console.error('Fehler beim Speichern:', err);
+      }
+    });
 
+    async function clearMarkers() {
+      if (!confirm('Wirklich alle Marker löschen?')) return;
+      try {
+        await fetch('/markers', { method: 'DELETE' });
+        refreshMarkers();
+      } catch (err) {
+        console.error('Fehler beim Löschen:', err);
+      }
+    }
+
+    refreshMarkers();
+    setInterval(refreshMarkers, 3000);
+  </script>
 </body>
 </html>
