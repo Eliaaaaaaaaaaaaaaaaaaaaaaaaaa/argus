@@ -112,6 +112,57 @@
   </style>
 </head>
 <body>
+  <div id="loginScreen" style="
+position:fixed;
+inset:0;
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
+font-family:Arial,sans-serif;
+">
+
+<div style="
+background:#1e293b;
+padding:30px;
+border-radius:16px;
+width:320px;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+text-align:center;
+color:white;
+">
+
+<h2>ARGUS Secure Access</h2>
+
+<input id="passwordInput" type="password" placeholder="Passwort"
+style="
+width:100%;
+padding:12px;
+margin-top:15px;
+border:none;
+border-radius:10px;
+outline:none;
+">
+
+<button onclick="checkPassword()" style="
+width:100%;
+margin-top:12px;
+padding:12px;
+border:none;
+border-radius:10px;
+background:#2563eb;
+color:white;
+font-weight:bold;
+cursor:pointer;
+">
+Anmelden
+</button>
+
+<p id="errorMsg" style="color:#f87171;margin-top:10px;"></p>
+
+</div>
+</div>
   <div class="panel">
     <div class="title">ARGUS Tactical Map</div>
     <div class="sub">Klick auf die Karte, um einen Marker zu setzen.</div>
@@ -268,5 +319,27 @@ function makeIcon(type, category) {
     refreshMarkers();
     setInterval(refreshMarkers, 3000);
   </script>
+<script>
+
+function checkPassword() {
+
+const correctPassword = "BODLUV4theWIN";
+const input = document.getElementById("passwordInput").value;
+
+if (input === correctPassword) {
+document.getElementById("loginScreen").style.display = "none";
+} else {
+document.getElementById("errorMsg").textContent = "Falsches Passwort";
+}
+
+}
+
+document.getElementById("passwordInput").addEventListener("keypress", function(e) {
+if (e.key === "Enter") {
+checkPassword();
+}
+});
+
+</script>
 </body>
 </html>
