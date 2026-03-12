@@ -190,7 +190,6 @@ Anmelden
 
     <div class="row" style="margin-top: 10px;">
       <button class="primary" onclick="refreshMarkers()">Aktualisieren</button>
-      <button class="danger" onclick="clearMarkers()">Alles löschen</button>
     </div>
 
     <div class="meta">
@@ -270,14 +269,22 @@ function makeIcon(type, category) {
         layerGroup.clearLayers();
 
         data.forEach(m => {
-          const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
-          marker.bindPopup(`
-            <strong>${categoryLabel[m.category] || m.category}</strong><br>
-            Typ: ${m.type}<br>
-            ${m.note ? `Notiz: ${m.note}<br>` : ''}
-            Lat: ${Number(m.lat).toFixed(5)}<br>
-            Lng: ${Number(m.lng).toFixed(5)}
-          `);
+         const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
+
+marker.bindPopup(`
+<b>${m.type}</b><br>
+<button onclick="deleteMarker(${m.id})" style="
+margin-top:6px;
+padding:4px 8px;
+border:none;
+background:#ef4444;
+color:white;
+border-radius:6px;
+cursor:pointer;
+">
+Marker löschen
+</button>
+`);
         });
       } catch (err) {
         console.error('Fehler beim Laden der Marker:', err);
