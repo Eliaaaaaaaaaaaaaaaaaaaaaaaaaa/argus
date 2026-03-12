@@ -267,18 +267,23 @@
 
     <div class="row" style="margin-top: 10px;">
       <button class="primary" onclick="refreshAll()">Aktualisieren</button>
-      <button class="warn" onclick="cancelArea()">Gebiet verwerfen</button>
     </div>
 
-    <div class="row" style="margin-top: 8px;">
-      <button class="primary" onclick="finishArea()">Gebiet abschliessen</button>
-      <button onclick="centerSwitzerland()">Auf Schweiz zentrieren</button>
-    </div>
+    <div id="areaControls" style="display:none;">
+      <div class="row" style="margin-top: 8px;">
+        <button class="warn" onclick="cancelArea()">Gebiet verwerfen</button>
+        <button class="primary" onclick="finishArea()">Gebiet abschliessen</button>
+      </div>
 
-    <div class="status-box">
-      <strong>Gebiet-Zeichnung:</strong><br>
-      Punkte gesetzt: <span id="areaPointCount">0</span><br>
-      Status: <span id="areaStatus">Bereit</span>
+      <div class="row" style="margin-top: 8px;">
+        <button onclick="centerSwitzerland()">Auf Schweiz zentrieren</button>
+      </div>
+
+      <div class="status-box">
+        <strong>Gebiet-Zeichnung:</strong><br>
+        Punkte gesetzt: <span id="areaPointCount">0</span><br>
+        Status: <span id="areaStatus">Bereit</span>
+      </div>
     </div>
 
     <div class="meta">
@@ -308,7 +313,6 @@
 
     let currentAreaPoints = [];
     let tempAreaPolygon = null;
-    let tempPointMarkers = [];
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
@@ -336,8 +340,25 @@
     }
 
     function updateAreaStatus(text) {
-      document.getElementById('areaStatus').textContent = text;
-      document.getElementById('areaPointCount').textContent = currentAreaPoints.length;
+      const pointCountEl = document.getElementById('areaPointCount');
+      const statusEl = document.getElementById('areaStatus');
+
+      if (pointCountEl) pointCountEl.textContent = currentAreaPoints.length;
+      if (statusEl) statusEl.textContent = text;
+    }
+
+    function updateModeUI() {
+      const mode = document.getElementById('drawMode').value;
+      const areaControls = document.getElementById('areaControls');
+
+      if (mode === 'area') {
+        areaControls.style.display = 'block';
+      } else {
+        areaControls.style.display = 'none';
+        cancelArea();
+      }
+
+      refreshAreas();
     }
 
     function makeIcon(type, category) {
@@ -408,7 +429,6 @@
 
     function drawTemporaryArea() {
       tempLayerGroup.clearLayers();
-      tempPointMarkers = [];
 
       currentAreaPoints.forEach((point, index) => {
         const pointMarker = L.circleMarker(point, {
@@ -423,8 +443,6 @@
           permanent: false,
           direction: 'top'
         });
-
-        tempPointMarkers.push(pointMarker);
       });
 
       if (currentAreaPoints.length >= 2) {
@@ -433,7 +451,8 @@
           fillColor: '#ffffff',
           fillOpacity: 0.08,
           weight: 2,
-          dashArray: '6, 6'
+          dashArray: '6, 6',
+          interactive: false
         }).addTo(tempLayerGroup);
       } else {
         tempAreaPolygon = null;
@@ -489,7 +508,7 @@
         refreshAreas();
       } catch (err) {
         console.error('Fehler beim Speichern des Gebiets:', err);
-        alert('Gebiet konnte nicht gespeichert werden. Backend /areas fehlt vermutlich noch.');
+        alert('Gebiet konnte nicht gespeichert werden.');
       }
     }
 
@@ -540,17 +559,36 @@
         const data = await res.json();
         areaLayerGroup.clearLayers();
 
-        data.forEach(a => {
-          const polygon = L.polygon(a.points, getAreaStyle(a.category)).addTo(areaLayerGroup);
+        const isAreaMode = document.getElementById('drawMode').value === 'area';
 
-          polygon.bindPopup(`
-            <b>Gebiet</b><br>
-            Kategorie: ${categoryLabels[a.category] || a.category}<br>
-            Typ: ${emojiMap[a.type] || '📍'} ${a.type || 'Unbekannt'}<br>
-            Eckpunkte: ${Array.isArray(a.points) ? a.points.length : 0}<br>
-            Zeit: ${a.timestamp ? new Date(a.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br>
-            ${a.note ? `Notiz: ${a.note}<br>` : ''}
-          `);
+        data.forEach(a => {
+          const polygon = L.polygon(a.points, {
+            ...getAreaStyle(a.category),
+            interactive: isAreaMode
+          }).addTo(areaLayerGroup);
+
+          if (isAreaMode) {
+            polygon.bindPopup(`
+              <b>Gebiet</b><br>
+              Kategorie: ${categoryLabels[a.category] || a.category}<br>
+              Typ: ${emojiMap[a.type] || '📍'} ${a.type || 'Unbekannt'}<br>
+              Eckpunkte: ${Array.isArray(a.points) ? a.points.length : 0}<br>
+              Zeit: ${a.timestamp ? new Date(a.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br>
+              ${a.note ? `Notiz: ${a.note}<br>` : ''}
+              <br>
+              <button onclick="deleteArea(${a.id})" style="
+                margin-top:6px;
+                padding:6px 10px;
+                border:none;
+                background:#ef4444;
+                color:white;
+                border-radius:6px;
+                cursor:pointer;
+              ">
+                Gebiet löschen
+              </button>
+            `);
+          }
         });
       } catch (err) {
         console.error('Fehler beim Laden der Gebiete:', err);
@@ -603,9 +641,23 @@
       }
     }
 
+    async function deleteArea(id) {
+      try {
+        await fetch('/delete_area/' + id, {
+          method: 'DELETE'
+        });
+        refreshAreas();
+      } catch (err) {
+        console.error('Fehler beim Löschen des Gebiets:', err);
+      }
+    }
+
+    document.getElementById('drawMode').addEventListener('change', updateModeUI);
+
     refreshAll();
     setInterval(refreshAll, 3000);
     updateAreaStatus('Bereit');
+    updateModeUI();
   </script>
 
   <script>
