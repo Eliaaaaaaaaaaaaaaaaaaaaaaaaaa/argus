@@ -16,7 +16,9 @@
       --muted: #94a3b8;
       --accent: #60a5fa;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Inter, Arial, sans-serif;
@@ -24,7 +26,13 @@
       color: var(--text);
       overflow: hidden;
     }
-    #map { height: 100vh; width: 100vw; background: #020617; }
+
+    #map {
+      height: 100vh;
+      width: 100vw;
+      background: #020617;
+    }
+
     .panel {
       position: absolute;
       z-index: 1000;
@@ -38,10 +46,30 @@
       border-radius: 16px;
       padding: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      max-height: calc(100vh - 24px);
+      overflow-y: auto;
     }
-    .title { font-size: 18px; font-weight: 700; margin: 0 0 4px; }
-    .sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-    label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 6px; }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    .sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 6px;
+    }
+
     select, input, button {
       width: 100%;
       border-radius: 10px;
@@ -51,22 +79,32 @@
       padding: 10px 12px;
       font-size: 14px;
     }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
     button {
       cursor: pointer;
       font-weight: 600;
       transition: transform .08s ease, opacity .2s ease;
     }
+
     button:hover { opacity: .95; }
     button:active { transform: translateY(1px); }
+
     .primary { background: #2563eb; }
-    .danger { background: #991b1b; }
+    .warn { background: #92400e; }
+
     .meta {
       margin-top: 10px;
       font-size: 12px;
       color: var(--muted);
       line-height: 1.45;
     }
+
     .legend {
       position: absolute;
       right: 12px;
@@ -79,7 +117,12 @@
       min-width: 220px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
-    .legend h3 { margin: 0 0 10px; font-size: 14px; }
+
+    .legend h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
     .legend-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -87,12 +130,14 @@
       font-size: 12px;
       color: var(--muted);
     }
+
     .leaflet-popup-content-wrapper,
     .leaflet-popup-tip {
       background: #0f172a;
       color: var(--text);
       border: 1px solid var(--line);
     }
+
     .emoji-icon {
       display: flex;
       align-items: center;
@@ -105,6 +150,29 @@
       border: 1px solid rgba(255,255,255,0.14);
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
+
+    .mode-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .status-box {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.65);
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .status-box strong {
+      color: var(--text);
+    }
+
     @media (max-width: 680px) {
       .panel { width: calc(100vw - 24px); }
       .legend { display: none; }
@@ -113,59 +181,68 @@
 </head>
 <body>
   <div id="loginScreen" style="
-position:fixed;
-inset:0;
-background:#0f172a;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
-font-family:Arial,sans-serif;
-">
+    position:fixed;
+    inset:0;
+    background:#0f172a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    font-family:Arial,sans-serif;
+  ">
+    <div style="
+      background:#1e293b;
+      padding:30px;
+      border-radius:16px;
+      width:320px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.4);
+      text-align:center;
+      color:white;
+    ">
+      <h2>ARGUS Secure Access</h2>
 
-<div style="
-background:#1e293b;
-padding:30px;
-border-radius:16px;
-width:320px;
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
-text-align:center;
-color:white;
-">
+      <input id="passwordInput" type="password" placeholder="Passwort"
+      style="
+        width:100%;
+        padding:12px;
+        margin-top:15px;
+        border:none;
+        border-radius:10px;
+        outline:none;
+      ">
 
-<h2>ARGUS Secure Access</h2>
+      <button onclick="checkPassword()" style="
+        width:100%;
+        margin-top:12px;
+        padding:12px;
+        border:none;
+        border-radius:10px;
+        background:#2563eb;
+        color:white;
+        font-weight:bold;
+        cursor:pointer;
+      ">
+        Anmelden
+      </button>
 
-<input id="passwordInput" type="password" placeholder="Passwort"
-style="
-width:100%;
-padding:12px;
-margin-top:15px;
-border:none;
-border-radius:10px;
-outline:none;
-">
+      <p id="errorMsg" style="color:#f87171;margin-top:10px;"></p>
+    </div>
+  </div>
 
-<button onclick="checkPassword()" style="
-width:100%;
-margin-top:12px;
-padding:12px;
-border:none;
-border-radius:10px;
-background:#2563eb;
-color:white;
-font-weight:bold;
-cursor:pointer;
-">
-Anmelden
-</button>
-
-<p id="errorMsg" style="color:#f87171;margin-top:10px;"></p>
-
-</div>
-</div>
   <div class="panel">
     <div class="title">ARGUS Tactical Map</div>
-    <div class="sub">Klick auf die Karte, um einen Marker zu setzen.</div>
+    <div class="sub">Setze einzelne Marker oder zeichne Gebiete direkt auf der Karte.</div>
+
+    <label for="drawMode">Modus</label>
+    <select id="drawMode">
+      <option value="marker">Marker</option>
+      <option value="area">Gebiet</option>
+    </select>
+
+    <div class="mode-hint">
+      Marker-Modus: Ein Klick = ein Marker<br>
+      Gebiet-Modus: Mehrere Punkte setzen und danach abschliessen
+    </div>
 
     <label for="category">Kategorie</label>
     <select id="category">
@@ -189,7 +266,19 @@ Anmelden
     <input id="note" type="text" maxlength="120" placeholder="Optionaler Text" />
 
     <div class="row" style="margin-top: 10px;">
-      <button class="primary" onclick="refreshMarkers()">Aktualisieren</button>
+      <button class="primary" onclick="refreshAll()">Aktualisieren</button>
+      <button class="warn" onclick="cancelArea()">Gebiet verwerfen</button>
+    </div>
+
+    <div class="row" style="margin-top: 8px;">
+      <button class="primary" onclick="finishArea()">Gebiet abschliessen</button>
+      <button onclick="centerSwitzerland()">Auf Schweiz zentrieren</button>
+    </div>
+
+    <div class="status-box">
+      <strong>Gebiet-Zeichnung:</strong><br>
+      Punkte gesetzt: <span id="areaPointCount">0</span><br>
+      Status: <span id="areaStatus">Bereit</span>
     </div>
 
     <div class="meta">
@@ -211,145 +300,331 @@ Anmelden
   <div id="map"></div>
 
   <script>
-  const map = L.map('map').setView([46.8182, 8.2275], 8);
-  const layerGroup = L.layerGroup().addTo(map);
+    const map = L.map('map').setView([46.8182, 8.2275], 8);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
+    const markerLayerGroup = L.layerGroup().addTo(map);
+    const areaLayerGroup = L.layerGroup().addTo(map);
+    const tempLayerGroup = L.layerGroup().addTo(map);
 
-  const emojiMap = {
-    drone: '🚁',
-    troops: '👥',
-    jet: '✈️',
-    tank: '🛡️',
-    artillery: '💥',
-    mine: '⚠️',
-    antiair: '🎯'
-  };
+    let currentAreaPoints = [];
+    let tempAreaPolygon = null;
+    let tempPointMarkers = [];
 
-  const categoryLabels = {
-    danger: 'Gefahr',
-    friendly: 'Eigene Kräfte',
-    enemy: 'Feind'
-  };
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
 
-  function makeIcon(type, category) {
-    const emoji = emojiMap[type] || '📍';
-
-    let color = "#94a3b8";
-    if (category === "danger") color = "#facc15";
-    if (category === "friendly") color = "#3b82f6";
-    if (category === "enemy") color = "#ef4444";
-
-    return L.divIcon({
-      className: '',
-      html: `
-        <div class="emoji-icon" style="
-          background:${color};
-          color:#000;
-          border:2px solid rgba(0,0,0,0.4);
-          font-size:18px;
-        ">
-          ${emoji}
-        </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-      popupAnchor: [0, -10]
-    });
-  }
-
-  async function refreshMarkers() {
-    try {
-      const res = await fetch('/markers', { cache: 'no-store' });
-      const data = await res.json();
-      layerGroup.clearLayers();
-
-      data.forEach(m => {
-        const marker = L.marker([m.lat, m.lng], {
-          icon: makeIcon(m.type, m.category)
-        }).addTo(layerGroup);
-
-        marker.bindPopup(`
-          <b>${emojiMap[m.type] || '📍'} ${m.type}</b><br>
-          Kategorie: ${categoryLabels[m.category] || m.category}<br>
-          Koordinaten: ${Number(m.lat).toFixed(5)}, ${Number(m.lng).toFixed(5)}<br>
-          Zeit: ${m.timestamp ? new Date(m.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br>
-          ${m.note ? `Notiz: ${m.note}<br>` : ''}
-          <br>
-          <button onclick="deleteMarker(${m.id})" style="
-            margin-top:6px;
-            padding:6px 10px;
-            border:none;
-            background:#ef4444;
-            color:white;
-            border-radius:6px;
-            cursor:pointer;
-          ">
-            Marker löschen
-          </button>
-        `);
-      });
-    } catch (err) {
-      console.error('Fehler beim Laden der Marker:', err);
-    }
-  }
-
-  map.on('click', async (e) => {
-    const payload = {
-      lat: e.latlng.lat,
-      lng: e.latlng.lng,
-      category: document.getElementById('category').value,
-      type: document.getElementById('type').value,
-      note: document.getElementById('note').value
+    const emojiMap = {
+      drone: '🚁',
+      troops: '👥',
+      jet: '✈️',
+      tank: '🛡️',
+      artillery: '💥',
+      mine: '⚠️',
+      antiair: '🎯'
     };
 
-    try {
-      await fetch('/markers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    const categoryLabels = {
+      danger: 'Gefahr',
+      friendly: 'Eigene Kräfte',
+      enemy: 'Feind'
+    };
+
+    function centerSwitzerland() {
+      map.setView([46.8182, 8.2275], 8);
+    }
+
+    function updateAreaStatus(text) {
+      document.getElementById('areaStatus').textContent = text;
+      document.getElementById('areaPointCount').textContent = currentAreaPoints.length;
+    }
+
+    function makeIcon(type, category) {
+      const emoji = emojiMap[type] || '📍';
+
+      let color = "#94a3b8";
+      if (category === "danger") color = "#facc15";
+      if (category === "friendly") color = "#3b82f6";
+      if (category === "enemy") color = "#ef4444";
+
+      return L.divIcon({
+        className: '',
+        html: `
+          <div class="emoji-icon" style="
+            background:${color};
+            color:#000;
+            border:2px solid rgba(0,0,0,0.4);
+            font-size:18px;
+          ">
+            ${emoji}
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -10]
       });
-      document.getElementById('note').value = '';
-      refreshMarkers();
-    } catch (err) {
-      console.error('Fehler beim Speichern:', err);
     }
-  });
 
-  async function deleteMarker(id) {
-    try {
-      await fetch('/delete_marker/' + id, {
-        method: 'DELETE'
+    function getAreaStyle(category) {
+      if (category === 'danger') {
+        return {
+          color: '#facc15',
+          fillColor: '#facc15',
+          fillOpacity: 0.18,
+          weight: 2,
+          dashArray: '8, 6'
+        };
+      }
+
+      if (category === 'friendly') {
+        return {
+          color: '#3b82f6',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.18,
+          weight: 2,
+          dashArray: '8, 6'
+        };
+      }
+
+      if (category === 'enemy') {
+        return {
+          color: '#ef4444',
+          fillColor: '#ef4444',
+          fillOpacity: 0.18,
+          weight: 2,
+          dashArray: '8, 6'
+        };
+      }
+
+      return {
+        color: '#94a3b8',
+        fillColor: '#94a3b8',
+        fillOpacity: 0.18,
+        weight: 2,
+        dashArray: '8, 6'
+      };
+    }
+
+    function drawTemporaryArea() {
+      tempLayerGroup.clearLayers();
+      tempPointMarkers = [];
+
+      currentAreaPoints.forEach((point, index) => {
+        const pointMarker = L.circleMarker(point, {
+          radius: 5,
+          color: '#ffffff',
+          fillColor: '#ffffff',
+          fillOpacity: 0.9,
+          weight: 1
+        }).addTo(tempLayerGroup);
+
+        pointMarker.bindTooltip(`Punkt ${index + 1}`, {
+          permanent: false,
+          direction: 'top'
+        });
+
+        tempPointMarkers.push(pointMarker);
       });
-      refreshMarkers();
-    } catch (err) {
-      console.error('Fehler beim Löschen des Markers:', err);
-    }
-  }
 
-  refreshMarkers();
-  setInterval(refreshMarkers, 3000);
-</script>
-<script>
-  function checkPassword() {
-    const correctPassword = "BODLUV4theWIN";
-    const input = document.getElementById("passwordInput").value;
+      if (currentAreaPoints.length >= 2) {
+        tempAreaPolygon = L.polygon(currentAreaPoints, {
+          color: '#ffffff',
+          fillColor: '#ffffff',
+          fillOpacity: 0.08,
+          weight: 2,
+          dashArray: '6, 6'
+        }).addTo(tempLayerGroup);
+      } else {
+        tempAreaPolygon = null;
+      }
 
-    if (input === correctPassword) {
-      document.getElementById("loginScreen").style.display = "none";
-    } else {
-      document.getElementById("errorMsg").textContent = "Falsches Passwort";
+      if (currentAreaPoints.length === 0) {
+        updateAreaStatus('Bereit');
+      } else if (currentAreaPoints.length < 3) {
+        updateAreaStatus('Weitere Punkte nötig');
+      } else {
+        updateAreaStatus('Gebiet kann abgeschlossen werden');
+      }
     }
-  }
 
-  document.getElementById("passwordInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      checkPassword();
+    function cancelArea() {
+      currentAreaPoints = [];
+      tempAreaPolygon = null;
+      tempLayerGroup.clearLayers();
+      updateAreaStatus('Bereit');
     }
-  });
-</script>
+
+    async function finishArea() {
+      if (document.getElementById('drawMode').value !== 'area') {
+        alert('Bitte zuerst auf Gebiet-Modus wechseln.');
+        return;
+      }
+
+      if (currentAreaPoints.length < 3) {
+        alert('Mindestens 3 Punkte nötig.');
+        return;
+      }
+
+      const payload = {
+        category: document.getElementById('category').value,
+        type: document.getElementById('type').value,
+        note: document.getElementById('note').value,
+        points: currentAreaPoints
+      };
+
+      try {
+        const res = await fetch('/areas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error('Backend konnte Gebiet nicht speichern');
+        }
+
+        document.getElementById('note').value = '';
+        cancelArea();
+        refreshAreas();
+      } catch (err) {
+        console.error('Fehler beim Speichern des Gebiets:', err);
+        alert('Gebiet konnte nicht gespeichert werden. Backend /areas fehlt vermutlich noch.');
+      }
+    }
+
+    async function refreshMarkers() {
+      try {
+        const res = await fetch('/markers', { cache: 'no-store' });
+        const data = await res.json();
+        markerLayerGroup.clearLayers();
+
+        data.forEach(m => {
+          const marker = L.marker([m.lat, m.lng], {
+            icon: makeIcon(m.type, m.category)
+          }).addTo(markerLayerGroup);
+
+          marker.bindPopup(`
+            <b>${emojiMap[m.type] || '📍'} ${m.type}</b><br>
+            Kategorie: ${categoryLabels[m.category] || m.category}<br>
+            Koordinaten: ${Number(m.lat).toFixed(5)}, ${Number(m.lng).toFixed(5)}<br>
+            Zeit: ${m.timestamp ? new Date(m.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br>
+            ${m.note ? `Notiz: ${m.note}<br>` : ''}
+            <br>
+            <button onclick="deleteMarker(${m.id})" style="
+              margin-top:6px;
+              padding:6px 10px;
+              border:none;
+              background:#ef4444;
+              color:white;
+              border-radius:6px;
+              cursor:pointer;
+            ">
+              Marker löschen
+            </button>
+          `);
+        });
+      } catch (err) {
+        console.error('Fehler beim Laden der Marker:', err);
+      }
+    }
+
+    async function refreshAreas() {
+      try {
+        const res = await fetch('/areas', { cache: 'no-store' });
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        areaLayerGroup.clearLayers();
+
+        data.forEach(a => {
+          const polygon = L.polygon(a.points, getAreaStyle(a.category)).addTo(areaLayerGroup);
+
+          polygon.bindPopup(`
+            <b>Gebiet</b><br>
+            Kategorie: ${categoryLabels[a.category] || a.category}<br>
+            Typ: ${emojiMap[a.type] || '📍'} ${a.type || 'Unbekannt'}<br>
+            Eckpunkte: ${Array.isArray(a.points) ? a.points.length : 0}<br>
+            Zeit: ${a.timestamp ? new Date(a.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br>
+            ${a.note ? `Notiz: ${a.note}<br>` : ''}
+          `);
+        });
+      } catch (err) {
+        console.error('Fehler beim Laden der Gebiete:', err);
+      }
+    }
+
+    async function refreshAll() {
+      await refreshMarkers();
+      await refreshAreas();
+    }
+
+    map.on('click', async (e) => {
+      const mode = document.getElementById('drawMode').value;
+
+      if (mode === 'marker') {
+        const payload = {
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+          category: document.getElementById('category').value,
+          type: document.getElementById('type').value,
+          note: document.getElementById('note').value
+        };
+
+        try {
+          await fetch('/markers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          document.getElementById('note').value = '';
+          refreshMarkers();
+        } catch (err) {
+          console.error('Fehler beim Speichern:', err);
+        }
+      } else if (mode === 'area') {
+        currentAreaPoints.push([e.latlng.lat, e.latlng.lng]);
+        drawTemporaryArea();
+      }
+    });
+
+    async function deleteMarker(id) {
+      try {
+        await fetch('/delete_marker/' + id, {
+          method: 'DELETE'
+        });
+        refreshMarkers();
+      } catch (err) {
+        console.error('Fehler beim Löschen des Markers:', err);
+      }
+    }
+
+    refreshAll();
+    setInterval(refreshAll, 3000);
+    updateAreaStatus('Bereit');
+  </script>
+
+  <script>
+    function checkPassword() {
+      const correctPassword = "BODLUV4theWIN";
+      const input = document.getElementById("passwordInput").value;
+
+      if (input === correctPassword) {
+        document.getElementById("loginScreen").style.display = "none";
+      } else {
+        document.getElementById("errorMsg").textContent = "Falsches Passwort";
+      }
+    }
+
+    document.getElementById("passwordInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        checkPassword();
+      }
+    });
+  </script>
 </body>
 </html>
