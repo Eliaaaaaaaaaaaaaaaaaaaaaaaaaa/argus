@@ -48,6 +48,7 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.35);
       max-height: calc(100vh - 24px);
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .title {
@@ -138,6 +139,11 @@
       border: 1px solid var(--line);
     }
 
+    .leaflet-popup-content {
+      margin: 12px 14px;
+      line-height: 1.45;
+    }
+
     .emoji-icon {
       display: flex;
       align-items: center;
@@ -174,8 +180,53 @@
     }
 
     @media (max-width: 680px) {
-      .panel { width: calc(100vw - 24px); }
-      .legend { display: none; }
+      .panel {
+        top: auto;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        width: auto;
+        max-width: none;
+        max-height: 48vh;
+        padding: 12px;
+        border-radius: 14px;
+      }
+
+      .title {
+        font-size: 16px;
+      }
+
+      .sub,
+      .meta,
+      .mode-hint,
+      .status-box,
+      label {
+        font-size: 11px;
+      }
+
+      select, input, button {
+        font-size: 16px;
+        padding: 12px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .legend {
+        display: none;
+      }
+
+      #loginScreen > div {
+        width: calc(100vw - 32px) !important;
+        max-width: 360px;
+        padding: 22px !important;
+      }
+
+      .leaflet-popup-content {
+        font-size: 13px;
+        line-height: 1.4;
+      }
     }
   </style>
 </head>
