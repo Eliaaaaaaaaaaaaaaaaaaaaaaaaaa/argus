@@ -211,166 +211,145 @@ Anmelden
   <div id="map"></div>
 
   <script>
-    const map = L.map('map').setView([46.8182, 8.2275], 8);
-    const layerGroup = L.layerGroup().addTo(map);
+  const map = L.map('map').setView([46.8182, 8.2275], 8);
+  const layerGroup = L.layerGroup().addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
 
-    const emojiMap = {
-      drone: '🚁',
-      troops: '👥',
-      jet: '✈️',
-      tank: '🛡️',
-      artillery: '💥',
-      mine: '⚠️',
-      antiair: '🎯'
-    };
+  const emojiMap = {
+    drone: '🚁',
+    troops: '👥',
+    jet: '✈️',
+    tank: '🛡️',
+    artillery: '💥',
+    mine: '⚠️',
+    antiair: '🎯'
+  };
 
-    const categoryLabel = {
-      danger: 'Gefahr',
-      friendly: 'Eigene Kräfte',
-      enemy: 'Feind'
-    };
-
-function makeIcon(type, category) {
-  const emoji = emojiMap[type] || '📍';
-
-  let color = "#94a3b8";
-
-  if (category === "danger") color = "#facc15";   // Gelb
-  if (category === "friendly") color = "#3b82f6"; // Blau
-  if (category === "enemy") color = "#ef4444";    // Rot
-
-  return L.divIcon({
-    className: '',
-    html: `
-      <div class="emoji-icon" style="
-        background:${color};
-        color:#000;
-        border:2px solid rgba(0,0,0,0.4);
-        font-size:18px;
-      ">
-        ${emoji}
-      </div>
-    `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -10]
-  });
-}
-
-    async function refreshMarkers() {
-      try {
-        const res = await fetch('/markers', { cache: 'no-store' });
-        const data = await res.json();
-        layerGroup.clearLayers();
-
-        data.forEach(m => {
-         const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
-
-const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
-
-const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
-
-marker.bindPopup(`
-  <b>${m.type}</b><br>
-  Kategorie: ${m.category}<br>
-  Koordinaten: ${Number(m.lat).toFixed(5)}, ${Number(m.lng).toFixed(5)}<br>
-  Zeit: ${m.timestamp ? new Date(m.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br><br>
-
-  <button onclick="deleteMarker(${m.id})" style="
-    margin-top:6px;
-    padding:4px 8px;
-    border:none;
-    background:#ef4444;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-  ">
-    Marker löschen
-  </button>
-`);
-        });
-      } catch (err) {
-        console.error('Fehler beim Laden der Marker:', err);
-      }
-    }
-
-    map.on('click', async (e) => {
-      const payload = {
-        lat: e.latlng.lat,
-        lng: e.latlng.lng,
-        category: document.getElementById('category').value,
-        type: document.getElementById('type').value,
-        note: document.getElementById('note').value
-      };
-
-      try {
-        await fetch('/markers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        document.getElementById('note').value = '';
-        refreshMarkers();
-      } catch (err) {
-        console.error('Fehler beim Speichern:', err);
-      }
-    });
-
-    async function clearMarkers() {
-      if (!confirm('Wirklich alle Marker löschen?')) return;
-      try {
-        await fetch('/markers', { method: 'DELETE' });
-        refreshMarkers();
-      } catch (err) {
-        console.error('Fehler beim Löschen:', err);
-      }
-    }
-
-    refreshMarkers();
-    setInterval(refreshMarkers, 3000);
-  </script>
-<script>
-
-function checkPassword() {
-
-const correctPassword = "BODLUV4theWIN";
-const input = document.getElementById("passwordInput").value;
-
-if (input === correctPassword) {
-document.getElementById("loginScreen").style.display = "none";
-} else {
-document.getElementById("errorMsg").textContent = "Falsches Passwort";
-}
-
-}
-
-document.getElementById("passwordInput").addEventListener("keypress", function(e) {
-if (e.key === "Enter") {
-checkPassword();
-}
-});
-function deleteMarker(id) {
-
-  markers = markers.filter(m => m.id !== id);
-
-  fetch('/delete_marker/' + id, {
-    method: 'DELETE'
-  }).then(() => {
-    loadMarkers();
-  });
-
-}
   const categoryLabels = {
-  danger: "Gefahr",
-  friendly: "Eigene Kräfte",
-  enemy: "Feind"
-};
-  Kategorie: ${categoryLabels[m.category] || m.category}<br>
+    danger: 'Gefahr',
+    friendly: 'Eigene Kräfte',
+    enemy: 'Feind'
+  };
+
+  function makeIcon(type, category) {
+    const emoji = emojiMap[type] || '📍';
+
+    let color = "#94a3b8";
+    if (category === "danger") color = "#facc15";
+    if (category === "friendly") color = "#3b82f6";
+    if (category === "enemy") color = "#ef4444";
+
+    return L.divIcon({
+      className: '',
+      html: `
+        <div class="emoji-icon" style="
+          background:${color};
+          color:#000;
+          border:2px solid rgba(0,0,0,0.4);
+          font-size:18px;
+        ">
+          ${emoji}
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      popupAnchor: [0, -10]
+    });
+  }
+
+  async function refreshMarkers() {
+    try {
+      const res = await fetch('/markers', { cache: 'no-store' });
+      const data = await res.json();
+      layerGroup.clearLayers();
+
+      data.forEach(m => {
+        const marker = L.marker([m.lat, m.lng], {
+          icon: makeIcon(m.type, m.category)
+        }).addTo(layerGroup);
+
+        marker.bindPopup(`
+          <b>${emojiMap[m.type] || '📍'} ${m.type}</b><br>
+          Kategorie: ${categoryLabels[m.category] || m.category}<br>
+          Koordinaten: ${Number(m.lat).toFixed(5)}, ${Number(m.lng).toFixed(5)}<br>
+          Zeit: ${m.timestamp ? new Date(m.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br>
+          ${m.note ? `Notiz: ${m.note}<br>` : ''}
+          <br>
+          <button onclick="deleteMarker(${m.id})" style="
+            margin-top:6px;
+            padding:6px 10px;
+            border:none;
+            background:#ef4444;
+            color:white;
+            border-radius:6px;
+            cursor:pointer;
+          ">
+            Marker löschen
+          </button>
+        `);
+      });
+    } catch (err) {
+      console.error('Fehler beim Laden der Marker:', err);
+    }
+  }
+
+  map.on('click', async (e) => {
+    const payload = {
+      lat: e.latlng.lat,
+      lng: e.latlng.lng,
+      category: document.getElementById('category').value,
+      type: document.getElementById('type').value,
+      note: document.getElementById('note').value
+    };
+
+    try {
+      await fetch('/markers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      document.getElementById('note').value = '';
+      refreshMarkers();
+    } catch (err) {
+      console.error('Fehler beim Speichern:', err);
+    }
+  });
+
+  async function deleteMarker(id) {
+    try {
+      await fetch('/delete_marker/' + id, {
+        method: 'DELETE'
+      });
+      refreshMarkers();
+    } catch (err) {
+      console.error('Fehler beim Löschen des Markers:', err);
+    }
+  }
+
+  refreshMarkers();
+  setInterval(refreshMarkers, 3000);
+</script>
+<script>
+  function checkPassword() {
+    const correctPassword = "BODLUV4theWIN";
+    const input = document.getElementById("passwordInput").value;
+
+    if (input === correctPassword) {
+      document.getElementById("loginScreen").style.display = "none";
+    } else {
+      document.getElementById("errorMsg").textContent = "Falsches Passwort";
+    }
+  }
+
+  document.getElementById("passwordInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      checkPassword();
+    }
+  });
 </script>
 </body>
 </html>
