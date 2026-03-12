@@ -271,19 +271,27 @@ function makeIcon(type, category) {
         data.forEach(m => {
          const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
 
+const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
+
+const marker = L.marker([m.lat, m.lng], { icon: makeIcon(m.type, m.category) }).addTo(layerGroup);
+
 marker.bindPopup(`
-<b>${m.type}</b><br>
-<button onclick="deleteMarker(${m.id})" style="
-margin-top:6px;
-padding:4px 8px;
-border:none;
-background:#ef4444;
-color:white;
-border-radius:6px;
-cursor:pointer;
-">
-Marker löschen
-</button>
+  <b>${m.type}</b><br>
+  Kategorie: ${m.category}<br>
+  Koordinaten: ${Number(m.lat).toFixed(5)}, ${Number(m.lng).toFixed(5)}<br>
+  Zeit: ${m.timestamp ? new Date(m.timestamp).toLocaleString('de-CH') : 'Unbekannt'}<br><br>
+
+  <button onclick="deleteMarker(${m.id})" style="
+    margin-top:6px;
+    padding:4px 8px;
+    border:none;
+    background:#ef4444;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+  ">
+    Marker löschen
+  </button>
 `);
         });
       } catch (err) {
@@ -346,7 +354,23 @@ if (e.key === "Enter") {
 checkPassword();
 }
 });
+function deleteMarker(id) {
 
+  markers = markers.filter(m => m.id !== id);
+
+  fetch('/delete_marker/' + id, {
+    method: 'DELETE'
+  }).then(() => {
+    loadMarkers();
+  });
+
+}
+  const categoryLabels = {
+  danger: "Gefahr",
+  friendly: "Eigene Kräfte",
+  enemy: "Feind"
+};
+  Kategorie: ${categoryLabels[m.category] || m.category}<br>
 </script>
 </body>
 </html>
