@@ -17,12 +17,14 @@ def load_data():
         with open(DATA_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
+            # Altes Format: nur Marker als Liste
             if isinstance(data, list):
                 return {
                     "markers": data,
                     "areas": []
                 }
 
+            # Neues Format: Dict mit markers + areas
             if isinstance(data, dict):
                 return {
                     "markers": data.get("markers", []),
@@ -49,6 +51,10 @@ def health():
     return jsonify({'status': 'ok'})
 
 
+# --------------------
+# MARKERS
+# --------------------
+
 @app.route('/markers', methods=['GET'])
 def get_markers():
     with DATA_LOCK:
@@ -60,24 +66,27 @@ def get_markers():
 def add_marker():
     data_in = request.get_json(force=True, silent=True) or {}
 
+    lat = data_in.get('lat')
+    lng = data_in.get('lng')
+
+    if lat is None or lng is None:
+        return jsonify({'error': 'Missing coordinates'}), 400
+
     with DATA_LOCK:
         data = load_data()
         markers = data["markers"]
 
-        marker_id = max([m.get('id', 0) for m in markers], default=0) + 1
+        marker_id = max((m.get('id', 0) for m in markers), default=0) + 1
 
         marker = {
             'id': marker_id,
-            'lat': data_in.get('lat'),
-            'lng': data_in.get('lng'),
+            'lat': lat,
+            'lng': lng,
             'category': data_in.get('category', 'danger'),
             'type': data_in.get('type', 'drone'),
             'note': (data_in.get('note') or '').strip()[:120],
             'timestamp': datetime.utcnow().isoformat()
         }
-
-        if marker['lat'] is None or marker['lng'] is None:
-            return jsonify({'error': 'Missing coordinates'}), 400
 
         markers.append(marker)
         data["markers"] = markers
@@ -106,6 +115,10 @@ def clear_markers():
     return jsonify({'status': 'cleared'})
 
 
+# --------------------
+# AREAS
+# --------------------
+
 @app.route('/areas', methods=['GET'])
 def get_areas():
     with DATA_LOCK:
@@ -126,7 +139,7 @@ def add_area():
         if not isinstance(point, list) or len(point) != 2:
             return jsonify({'error': 'Invalid point format'}), 400
 
-        lat, lng = point[0], point[1]
+        lat, lng = point
 
         if lat is None or lng is None:
             return jsonify({'error': 'Invalid coordinates in points'}), 400
@@ -137,7 +150,7 @@ def add_area():
         data = load_data()
         areas = data["areas"]
 
-        area_id = max([a.get('id', 0) for a in areas], default=0) + 1
+        area_id = max((a.get('id', 0) for a in areas), default=0) + 1
 
         area = {
             'id': area_id,
